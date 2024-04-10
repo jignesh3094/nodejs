@@ -16,7 +16,9 @@
 
 
 const express = require('express');
-const app = express();
+var cors = require('cors')
+const app = express(cors());
+
 const news = require('./news');
 const categories = require('./categories');
 const middlware = require('./middleware');
