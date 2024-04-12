@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express();
 router.use(express.json());
+const uploadFile = require('./uploadfile')
+
 const database = require('./db');
 router.get('/', async(req, res) => {
   const table = database.db.collection("news");
@@ -19,14 +21,16 @@ router.get('/', async(req, res) => {
     pagsize = count;
   }
   const result = await table.find(filter).skip(skip).limit(pagsize).toArray();
-  count =  await table.countDocuments();
+  count =  await table.countDocuments(filter);
   res.send({data: result,totalResults:count});
 });
-router.post('/', async(req, res) => {
+router.post('/', uploadFile,async(req, res) => {
   const table = database.db.collection("news");
-  let data = req.body;
-  await table.insertMany(data);
-  res.send(data);
+  let data = JSON.parse(req.body.data);
+
+  data['image'] = req.file ? req.file.originalname: null;
+   await table.insertOne(data);
+   res.send({success: true,data: data});
 });
 router.delete('/:id', async(req, res) => {
   const table = database.db.collection("news");
